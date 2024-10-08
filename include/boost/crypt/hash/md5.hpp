@@ -80,17 +80,17 @@ auto md5_pad(const std::vector<std::uint8_t>& message) noexcept -> std::vector<s
 {
     std::vector<std::uint8_t> padded_message {message};
     const std::uint64_t original_length {message.size() * 8U};
-    padded_message.emplace_back(0x80);
+    padded_message.emplace_back(static_cast<std::uint8_t>(0x80));
 
     while ((padded_message.size() * 8U) % 512U != 448U)
     {
-        padded_message.push_back(static_cast<std::uint8_t>(0x00));
+        padded_message.emplace_back(static_cast<std::uint8_t>(0x00));
     }
 
     // Add the original length as a 64-bit number
     for (std::size_t i = 0; i < 8; ++i)
     {
-        padded_message.push_back(static_cast<std::uint8_t>((original_length >> (8 * i)) & 0xFF));
+        padded_message.emplace_back(static_cast<std::uint8_t>((original_length >> (8 * i)) & 0xFF));
     }
 
     return padded_message;
