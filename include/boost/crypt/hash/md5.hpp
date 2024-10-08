@@ -160,14 +160,13 @@ auto md5_impl(const std::vector<std::uint8_t>& padded_message) -> ResultType
 
 } // namespace detail
 
-template <typename ResultType, typename T>
+template <typename ResultType = std::array<std::uint32_t, 4>, typename T>
 ResultType md5(T begin, T end)
 {
     if (end <= begin)
     {
         return ResultType {0, 0, 0, 0};
     }
-
 
     const auto message {detail::md5_preprocess(begin, end)};
     const auto padded_message {detail::md5_pad(message)};
@@ -187,6 +186,20 @@ ResultType md5(const char* str)
     const auto padded_message {detail::md5_pad(message)};
     return detail::md5_impl<ResultType>(padded_message);
 }
+
+template <typename ResultType = std::array<std::uint32_t, 4>>
+ResultType md5(const std::string& str)
+{
+    return md5(str.begin(), str.end());
+}
+
+#ifdef BOOST_CRYPT_HAS_STRING_VIEW
+template <typename ResultType = std::array<std::uint32_t, 4>>
+ResultType md5(const std::string_view& str)
+{
+    return md5(str.begin(), str.end());
+}
+#endif
 
 } // namespace crypt
 } // namespace boost
