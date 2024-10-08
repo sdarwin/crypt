@@ -6,6 +6,7 @@
 
 #include <boost/crypt/hash/md5.hpp>
 #include <boost/core/lightweight_test.hpp>
+#include <string>
 
 void basic_tests()
 {
@@ -28,9 +29,52 @@ void basic_tests()
     BOOST_TEST_EQ(message_3_result[3], 0xecf8427e);
 }
 
+void string_test()
+{
+    std::string message_1 {"The quick brown fox jumps over the lazy dog"};
+    const auto message_1_result {boost::crypt::md5(message_1)};
+    BOOST_TEST_EQ(message_1_result[0], 0x9e107d9d);
+    BOOST_TEST_EQ(message_1_result[1], 0x372bb682);
+    BOOST_TEST_EQ(message_1_result[2], 0x6bd81d35);
+    BOOST_TEST_EQ(message_1_result[3], 0x42a419d6);
+
+    #ifdef BOOST_CRYPT_HAS_STRING_VIEW
+    std::string_view view_1 {message_1};
+    const auto view_1_result {boost::crypt::md5(view_1)};
+    BOOST_TEST_EQ(view_1_result[0], 0x9e107d9d);
+    BOOST_TEST_EQ(view_1_result[1], 0x372bb682);
+    BOOST_TEST_EQ(view_1_result[2], 0x6bd81d35);
+    BOOST_TEST_EQ(view_1_result[3], 0x42a419d6);
+    #endif
+
+    std::string message_2 {"The quick brown fox jumps over the lazy dog."};
+    const auto message_2_result {boost::crypt::md5(message_2.begin(), message_2.end())};
+    BOOST_TEST_EQ(message_2_result[0], 0xe4d909c2);
+    BOOST_TEST_EQ(message_2_result[1], 0x90d0fb1c);
+    BOOST_TEST_EQ(message_2_result[2], 0xa068ffad);
+    BOOST_TEST_EQ(message_2_result[3], 0xdf22cbd0);
+}
+
+void bad_input()
+{
+    const auto null_message {boost::crypt::md5(nullptr)};
+    BOOST_TEST_EQ(null_message[0], 0x0);
+    BOOST_TEST_EQ(null_message[1], 0x0);
+    BOOST_TEST_EQ(null_message[2], 0x0);
+    BOOST_TEST_EQ(null_message[3], 0x0);
+
+    std::string message_1 {"The quick brown fox jumps over the lazy dog"};
+    const auto message_1_result {boost::crypt::md5(message_1.begin(), message_1.begin())};
+    BOOST_TEST_EQ(message_1_result[0], 0x0);
+    BOOST_TEST_EQ(message_1_result[1], 0x0);
+    BOOST_TEST_EQ(message_1_result[2], 0x0);
+    BOOST_TEST_EQ(message_1_result[3], 0x0);
+}
+
 int main()
 {
     basic_tests();
+    bad_input();
 
     return boost::report_errors();
 }
