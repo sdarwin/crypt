@@ -9,7 +9,7 @@ project(cmake_install_test LANGUAGES CXX)
 find_package(boost_quick REQUIRED)
 
 add_executable(quick ../quick.cpp)
-target_link_libraries(quick Boost::quick)
+target_link_libraries(quick Boost::crypt)
 
 enable_testing()
 add_test(quick quick)
