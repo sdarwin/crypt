@@ -30,4 +30,16 @@
 #define BOOST_CRYPT_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
 // ----- Assertions -----
 
+// ----- Has CXX something -----
+// C++17
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+#  if __has_include(<string_view>)
+#    include <string_view>
+#    if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
+#      define BOOST_CRYPT_HAS_STRING_VIEW
+#    endif
+#  endif
+#endif
+// ----- Has CXX something -----
+
 #endif //BOOST_CRYPT_DETAIL_CONFIG_HPP
