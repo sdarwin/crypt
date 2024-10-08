@@ -8,6 +8,7 @@
 #include <boost/crypt/utility/config.hpp>
 #include <boost/crypt/utility/bit.hpp>
 
+#include <algorithm>
 #include <array>
 #include <vector>
 #include <string>
@@ -50,7 +51,13 @@ auto md5_preprocess(T begin, T end) -> std::vector<std::uint8_t>
 {
     std::vector<std::uint8_t> vec;
     vec.reserve(static_cast<std::size_t>(end - begin));
-    std::copy(begin, end, std::back_inserter(vec));
+
+    // Like std::copy but gives us the correct cast
+    std::transform(begin, end, std::back_inserter(vec),
+                   [](const auto& element) {
+                       return static_cast<std::uint8_t>(element);
+                   });
+
     return vec;
 }
 
@@ -59,7 +66,12 @@ auto md5_preprocess(T begin, std::size_t len) -> std::vector<std::uint8_t>
 {
     std::vector<std::uint8_t> vec;
     vec.reserve(len);
-    std::copy(begin, begin + len, std::back_inserter(vec));
+
+    std::transform(begin, begin + len, std::back_inserter(vec),
+                   [](const auto& element) {
+                       return static_cast<std::uint8_t>(element);
+                   });
+
     return vec;
 }
 
