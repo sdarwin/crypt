@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.5...3.16)
 
 project(cmake_install_test LANGUAGES CXX)
 
-find_package(boost_quick REQUIRED)
+find_package(boost_crypt REQUIRED)
 
 add_executable(quick ../quick.cpp)
 target_link_libraries(quick Boost::crypt)

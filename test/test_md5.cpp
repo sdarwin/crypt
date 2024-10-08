@@ -74,6 +74,7 @@ void bad_input()
 int main()
 {
     basic_tests();
+    string_test();
     bad_input();
 
     return boost::report_errors();
