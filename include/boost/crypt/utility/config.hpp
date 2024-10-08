@@ -11,6 +11,7 @@
 #  endif
 #endif
 
+// ---- Constexpr arrays -----
 #if defined(__cpp_inline_variables) && __cpp_inline_variables >= 201606L
 #  define BOOST_CRYPT_CONSTEXPR_ARRAY inline constexpr
 #  define BOOST_CRYPT_DEVICE_ARRAY inline constexpr
@@ -21,5 +22,12 @@
 #  define BOOST_CRYPT_CONSTEXPR_ARRAY static constexpr
 #  define BOOST_CRYPT_DEVICE_ARRAY static constexpr
 #endif
+// ---- Constexpr arrays -----
+
+// ----- Assertions -----
+#include <cassert>
+#define BOOST_CRYPT_ASSERT(x) assert(x)
+#define BOOST_CRYPT_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
+// ----- Assertions -----
 
 #endif //BOOST_CRYPT_DETAIL_CONFIG_HPP
