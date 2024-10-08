@@ -89,6 +89,14 @@ constexpr T rotr(T x, U s) noexcept
     return (x >> r) | (x << (N - r));
 }
 
+constexpr auto swap_endian(const std::uint32_t val) -> std::uint32_t
+{
+    return ((val & 0xFF000000) >> 24U) |
+           ((val & 0x00FF0000) >> 8U)  |
+           ((val & 0x0000FF00) << 8U)  |
+           ((val & 0x000000FF) << 24U);
+}
+
 } // namespace detail
 } // namespace crypt
 } // namespace boost
