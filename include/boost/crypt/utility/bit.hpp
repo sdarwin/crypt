@@ -8,6 +8,7 @@
 #include <boost/crypt/utility/config.hpp>
 #include <type_traits>
 #include <limits>
+#include <cstdint>
 
 namespace boost {
 namespace crypt {

@@ -10,7 +10,9 @@
 
 #include <array>
 #include <vector>
+#include <string>
 #include <cstdint>
+#include <cstring>
 
 namespace boost {
 namespace crypt {
