@@ -9,6 +9,7 @@
 #include <boost/crypt/utility/bit.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <array>
 #include <vector>
 #include <string>
