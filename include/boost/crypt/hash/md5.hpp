@@ -47,7 +47,7 @@ template <typename T>
 auto md5_preprocess(T begin, T end) -> std::vector<std::uint8_t>
 {
     std::vector<std::uint8_t> vec;
-    vec.reserve(end - begin);
+    vec.reserve(static_cast<std::size_t>(end - begin));
     std::copy(begin, end, std::back_inserter(vec));
     return vec;
 }
