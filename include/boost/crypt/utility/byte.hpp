@@ -98,7 +98,7 @@ public:
 
     constexpr auto operator~() noexcept -> byte&
     {
-        bits_ = ~bits_;
+        bits_ = static_cast<boost::crypt::uint8_t>(~bits_);
         return *this;
     }
 };
