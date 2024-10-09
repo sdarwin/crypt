@@ -6,8 +6,11 @@
 #define BOOST_CRYPT_UTILITY_BYTE_HPP
 
 #include <boost/crypt/utility/concepts.hpp>
-#include <type_traits>
+#include <boost/crypt/utility/type_traits.hpp>
+
+#ifndef BOOST_CRYPT_BUILD_MODULE
 #include <cstdint>
+#endif
 
 namespace boost {
 namespace crypt {
@@ -22,19 +25,22 @@ public:
     explicit constexpr byte(std::uint8_t bits) noexcept : bits_ {bits} {}
 
     template <typename IntegerType>
-    constexpr auto to_integer() noexcept -> IntegerType
+    constexpr auto to_integer() noexcept
+        BOOST_CRYPT_REQUIRES(boost::crypt::is_integral_v, IntegerType)
     {
         return static_cast<IntegerType>(bits_);
     }
 
     template <typename IntegerType>
-    constexpr auto operator<<(IntegerType shift) noexcept -> byte
+    constexpr auto operator<<(IntegerType shift) noexcept
+        BOOST_CRYPT_REQUIRES_RETURN(boost::crypt::is_integral_v, IntegerType, byte)
     {
         return byte{bits_ << shift};
     }
 
     template <typename IntegerType>
-    constexpr auto operator>>(IntegerType shift) noexcept -> byte
+    constexpr auto operator>>(IntegerType shift) noexcept
+        BOOST_CRYPT_REQUIRES_RETURN(boost::crypt::is_integral_v, IntegerType, byte)
     {
         return byte{bits_ >> shift};
     }
@@ -60,14 +66,16 @@ public:
     }
 
     template <typename IntegerType>
-    constexpr auto operator<<=(IntegerType shift) noexcept -> byte&
+    constexpr auto operator<<=(IntegerType shift) noexcept
+        BOOST_CRYPT_REQUIRES_RETURN(boost::crypt::is_integral_v, IntegerType, byte&)
     {
         bits_ <<= shift;
         return *this;
     }
 
     template <typename IntegerType>
-    constexpr auto operator >>=(IntegerType shift) noexcept -> byte&
+    constexpr auto operator >>=(IntegerType shift) noexcept
+        BOOST_CRYPT_REQUIRES_RETURN(boost::crypt::is_integral_v, IntegerType, byte&)
     {
         bits_ >>= shift;
         return *this;
