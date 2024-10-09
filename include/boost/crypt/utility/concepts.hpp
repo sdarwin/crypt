@@ -50,7 +50,7 @@
 namespace boost::crypt::concepts {
 
 template <typename T>
-concept integral = boost::crypt::detail::is_integral_v<T>;
+concept integral = boost::crypt::is_integral_v<T>;
 
 template <typename T>
 concept signed_integral = integral<T> && boost::crypt::is_signed_v<T>;
@@ -59,7 +59,7 @@ template <typename T>
 concept unsigned_integral = integral<T> && boost::crypt::is_unsigned_v<T>;
 
 template <typename T>
-concept real = boost::crypt::detail::is_floating_point_v<T>;
+concept real = boost::crypt::is_floating_point_v<T>;
 
 } // boost::crypt::concepts
 
