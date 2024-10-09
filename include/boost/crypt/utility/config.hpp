@@ -70,4 +70,14 @@
 #endif
 // ----- Has CXX something -----
 
+// ----- Unreachable -----
+#if defined(__GNUC__) || defined(__clang__)
+#  define BOOST_CRYPT_UNREACHABLE __builtin_unreachable()
+#elif defined(_MSC_VER)
+#  define BOOST_CRYPT_UNREACHABLE __assume(0)
+#else
+#  define BOOST_CRYPT_UNREACHABLE std::abort()
+#endif
+// ----- Unreachable -----
+
 #endif //BOOST_CRYPT_DETAIL_CONFIG_HPP
