@@ -99,6 +99,7 @@ auto md5_pad(const std::vector<boost::crypt::uint8_t>& message) noexcept -> std:
     return padded_message;
 }
 
+// TODO(mborland): Replace the loop with the known statements
 auto md5_body(const boost::crypt::array<boost::crypt::uint32_t, 16>& blocks,
               boost::crypt::uint32_t& a, boost::crypt::uint32_t& b,
               boost::crypt::uint32_t& c, boost::crypt::uint32_t& d) noexcept
@@ -183,6 +184,135 @@ auto md5_impl(const std::vector<boost::crypt::uint8_t>& padded_message) -> Resul
                        swap_endian(d0)};
 }
 
+template <typename ResultType, typename ForwardIterator>
+auto md5_impl(ForwardIterator first, ForwardIterator last) -> ResultType
+{
+    boost::crypt::uint32_t a0 {0x67452301};
+    boost::crypt::uint32_t b0 {0xefcdab89};
+    boost::crypt::uint32_t c0 {0x98badcfe};
+    boost::crypt::uint32_t d0 {0x10325476};
+
+    boost::crypt::array<boost::crypt::uint32_t, 16> blocks {};
+
+    do
+    {
+        if (first + 64U <= last)
+        {
+            for (auto& block : blocks)
+            {
+                block = static_cast<boost::crypt::uint32_t>(
+                         static_cast<boost::crypt::uint32_t>(*first) +
+                        (static_cast<boost::crypt::uint32_t>(*(first + 1U)) << 8U) +
+                        (static_cast<boost::crypt::uint32_t>(*(first + 2U)) << 16U) +
+                        (static_cast<boost::crypt::uint32_t>(*(first + 3U)) << 24U)
+                );
+
+                first += 4U;
+            }
+        }
+        else
+        {
+            // We need to conclude the message correctly with padding, and the message length
+            const auto message_length {static_cast<boost::crypt::uint64_t>(last - first) * 8UL};
+
+            boost::crypt::size_t current_block {};
+            while (first + 4U < last)
+            {
+                blocks[current_block] = static_cast<boost::crypt::uint32_t>(
+                        static_cast<boost::crypt::uint32_t>(*first) +
+                        (static_cast<boost::crypt::uint32_t>(*(first + 1U)) << 8U) +
+                        (static_cast<boost::crypt::uint32_t>(*(first + 2U)) << 16U) +
+                        (static_cast<boost::crypt::uint32_t>(*(first + 3U)) << 24U)
+                );
+
+                first += 4U;
+                ++current_block;
+            }
+
+            // Need to tack on the 0x80 as the last byte after the message
+            switch (last - first)
+            {
+                case 0:
+                    blocks[current_block] = static_cast<boost::crypt::uint32_t>(0x80);
+                    ++current_block;
+                    break;
+                case 1:
+                    blocks[current_block] = static_cast<boost::crypt::uint32_t>(
+                            static_cast<boost::crypt::uint32_t>(*first) +
+                            (static_cast<boost::crypt::uint32_t>(0x80) << 8U)
+                    );
+                    ++current_block;
+                    ++first;
+                    break;
+                case 2:
+                    blocks[current_block] = static_cast<boost::crypt::uint32_t>(
+                            static_cast<boost::crypt::uint32_t>(*first) +
+                            (static_cast<boost::crypt::uint32_t>(*(first + 1U)) << 8U) +
+                            (static_cast<boost::crypt::uint32_t>(0x80) << 16U)
+                    );
+                    ++current_block;
+                    first += 2U;
+                    break;
+                case 3:
+                    blocks[current_block] = static_cast<boost::crypt::uint32_t>(
+                            static_cast<boost::crypt::uint32_t>(*first) +
+                            (static_cast<boost::crypt::uint32_t>(*(first + 1U)) << 8U) +
+                            (static_cast<boost::crypt::uint32_t>(*(first + 2U)) << 16U) +
+                            (static_cast<boost::crypt::uint32_t>(0x80) << 24U)
+                    );
+                    ++current_block;
+                    first += 3U;
+                    break;
+                // LCOV_EXCL_START
+                default:
+                    BOOST_CRYPT_UNREACHABLE;
+                // LCOV_EXCL_STOP
+            }
+
+            while (current_block < 14U)
+            {
+                // Zero Pad
+                blocks[current_block] = static_cast<boost::crypt::uint32_t>(0x0);
+                ++current_block;
+            }
+
+            // Now we need add the original string length
+            if (current_block == 14U)
+            {
+                blocks[current_block] = static_cast<boost::crypt::uint32_t>(message_length & 0xFFFFFFFF);
+                blocks[current_block + 1] = static_cast<boost::crypt::uint32_t>((message_length >> 32) & 0xFFFFFFFF);
+            }
+            else
+            {
+                // We need to do another loop
+                BOOST_CRYPT_ASSERT(current_block == 15U);
+                blocks[current_block] = static_cast<boost::crypt::uint32_t>(0x0);
+                md5_body(blocks, a0, b0, c0, d0);
+
+                // The length is always last
+                current_block = 0;
+                ++current_block;
+                while (current_block < 14U)
+                {
+                    blocks[current_block] = static_cast<boost::crypt::uint32_t>(0x0);
+                    ++current_block;
+                }
+
+                blocks[current_block] = static_cast<boost::crypt::uint32_t>(message_length & 0xFFFFFFFF);
+                blocks[current_block + 1] = static_cast<boost::crypt::uint32_t>((message_length >> 32) & 0xFFFFFFFF);
+            }
+        }
+
+        md5_body(blocks, a0, b0, c0, d0);
+
+    } while (first != last);
+
+    return ResultType {swap_endian(a0),
+                       swap_endian(b0),
+                       swap_endian(c0),
+                       swap_endian(d0)};
+}
+
 } // namespace detail
 
 template <typename ResultType = std::array<boost::crypt::uint32_t, 4>, typename T>
@@ -207,9 +337,7 @@ ResultType md5(const char* str)
     }
 
     const auto message_len {std::strlen(str)};
-    const auto message {detail::md5_preprocess(str, message_len)};
-    const auto padded_message {detail::md5_pad(message)};
-    return detail::md5_impl<ResultType>(padded_message);
+    return detail::md5_impl<ResultType>(str, str + message_len);
 }
 
 template <typename ResultType = std::array<boost::crypt::uint32_t, 4>>
