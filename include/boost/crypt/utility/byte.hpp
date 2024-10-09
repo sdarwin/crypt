@@ -7,10 +7,7 @@
 
 #include <boost/crypt/utility/concepts.hpp>
 #include <boost/crypt/utility/type_traits.hpp>
-
-#ifndef BOOST_CRYPT_BUILD_MODULE
-#include <cstdint>
-#endif
+#include <boost/crypt/utility/cstdint.hpp>
 
 namespace boost {
 namespace crypt {
@@ -18,11 +15,11 @@ namespace crypt {
 class byte
 {
 private:
-    std::uint8_t bits_;
+    boost::crypt::uint8_t bits_;
 
 public:
     constexpr byte() noexcept : bits_ {} {}
-    explicit constexpr byte(std::uint8_t bits) noexcept : bits_ {bits} {}
+    explicit constexpr byte(boost::crypt::uint8_t bits) noexcept : bits_ {bits} {}
 
     template <typename IntegerType>
     constexpr auto to_integer() noexcept
@@ -47,22 +44,22 @@ public:
 
     constexpr auto operator|(byte rhs) const noexcept -> byte
     {
-        return byte{static_cast<std::uint8_t>(bits_ | rhs.bits_)};
+        return byte{static_cast<boost::crypt::uint8_t>(bits_ | rhs.bits_)};
     }
 
     constexpr auto operator&(byte rhs) const noexcept -> byte
     {
-        return byte{static_cast<std::uint8_t>(bits_ & rhs.bits_)};
+        return byte{static_cast<boost::crypt::uint8_t>(bits_ & rhs.bits_)};
     }
 
     constexpr auto operator^(byte rhs) const noexcept -> byte
     {
-        return byte{static_cast<std::uint8_t>(bits_ ^ rhs.bits_)};
+        return byte{static_cast<boost::crypt::uint8_t>(bits_ ^ rhs.bits_)};
     }
 
     constexpr auto operator~() const noexcept -> byte
     {
-        return byte{static_cast<std::uint8_t>(~bits_)};
+        return byte{static_cast<boost::crypt::uint8_t>(~bits_)};
     }
 
     template <typename IntegerType>
@@ -83,19 +80,19 @@ public:
 
     constexpr auto operator|(byte rhs) noexcept -> byte&
     {
-        bits_ = static_cast<std::uint8_t>(bits_ | rhs.bits_);
+        bits_ = static_cast<boost::crypt::uint8_t>(bits_ | rhs.bits_);
         return *this;
     }
 
     constexpr auto operator&(byte rhs) noexcept -> byte&
     {
-        bits_ = static_cast<std::uint8_t>(bits_ & rhs.bits_);
+        bits_ = static_cast<boost::crypt::uint8_t>(bits_ & rhs.bits_);
         return *this;
     }
 
     constexpr auto operator^(byte rhs) noexcept -> byte&
     {
-        bits_ = static_cast<std::uint8_t>(bits_ ^ rhs.bits_);
+        bits_ = static_cast<boost::crypt::uint8_t>(bits_ ^ rhs.bits_);
         return *this;
     }
 
