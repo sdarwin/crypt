@@ -8,7 +8,7 @@
 
 #include <boost/crypt/utility/config.hpp>
 
-#ifdef BOOST_CRYPT_ENABLE_CUDA
+#ifdef BOOST_CRYPT_HAS_CUDA
 
 #include <cuda/std/array>
 

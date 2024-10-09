@@ -7,10 +7,6 @@
 
 #include <boost/crypt/utility/type_traits.hpp>
 
-#ifndef BOOST_CRYPT_BUILD_MODULE
-#include <type_traits>
-#endif
-
 // GCC-11 yields internal compiler errors when using the concepts
 
 /*
