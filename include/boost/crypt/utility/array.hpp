@@ -29,8 +29,6 @@ public:
 
     T elements[N];
 
-    constexpr array() = default;
-
     // Iterators
     constexpr auto begin() noexcept -> iterator { return elements; }
     constexpr auto cbegin() const noexcept -> const_iterator { return elements; }
