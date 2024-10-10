@@ -99,6 +99,15 @@ public:
     }
 };
 
+template <typename ForwardIter, typename T>
+constexpr auto fill_array(ForwardIter first, ForwardIter last, T value)
+{
+    while (first != last)
+    {
+        *first++ = static_cast<decltype(*first)>(value);
+    }
+}
+
 } // namespace crypt
 } // namespace boost
 
