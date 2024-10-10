@@ -75,7 +75,7 @@ concept real = boost::crypt::is_floating_point_v<T>;
 #define BOOST_CRYPT_REQUIRES_TWO_RETURN(X1, T1, X2, T2, ReturnType) -> ReturnType requires X1<T1> && X2<T2>
 #define BOOST_CRYPT_REQUIRES_THREE(X1, T1, X2, T2, X3, T3) -> detail::promote_args_t<T1, T2, T3> requires X1<T1> && X2<T2> && X3<T3>
 #define BOOST_CRYPT_REQUIRES_RETURN(X, T, ReturnType) -> ReturnType requires X<T>
-
+#define BOOST_CRYPT_REQUIRES_CONVERSION(T1, T2) -> void requires boost::crypt::is_convertible_v<T1, T2>
 
 #endif // Has <concepts>
 #endif // C++20
@@ -115,6 +115,10 @@ concept real = boost::crypt::is_floating_point_v<T>;
 
 #ifndef BOOST_CRYPT_REQUIRES_RETURN
 #  define BOOST_CRYPT_REQUIRES_RETURN(X, T, ReturnType) -> boost::crypt::enable_if_t<X<T>, ReturnType>
+#endif
+
+#ifndef BOOST_CRYPT_REQUIRES_CONVERSION
+#  define BOOST_CRYPT_REQUIRES_CONVERSION(T1, T2) -> boost::crypt::enable_if_t<boost::crypt::is_convertible_v<T1, T2>, void>
 #endif
 
 #endif //BOOST_CRYPT_UTILITY_CONCEPTS_HPP
