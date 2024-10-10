@@ -51,13 +51,10 @@ using cuda::std::uint_least64_t;
 using cuda::std::uintmax_t;
 using cuda::std::uintptr_t;
 
-using size_t = unsigned long;
-
 #else
 
 #ifndef BOOST_CRYPT_BUILD_MODULE
 #include <cstdint>
-#include <cstddef>
 #endif
 
 namespace boost {
@@ -98,8 +95,6 @@ using std::uint_least64_t;
 
 using std::uintmax_t;
 using std::uintptr_t;
-
-using std::size_t;
 
 #endif
 
