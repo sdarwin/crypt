@@ -488,6 +488,9 @@ BOOST_CRYPT_INLINE_CONSTEXPR bool is_same_v = boost::crypt::is_same<T, U>::value
 template <typename T, typename U>
 BOOST_CRYPT_INLINE_CONSTEXPR bool is_base_of_v = boost::crypt::is_base_of<T, U>::value;
 
+template <typename T, typename U>
+BOOST_CRYPT_INLINE_CONSTEXPR bool is_convertible_v = boost::crypt::is_convertible<T, U>::value;
+
 } // namespace crypt
 } // namespace boost
 
