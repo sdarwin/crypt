@@ -7,6 +7,7 @@
 #include <boost/crypt/hash/md5.hpp>
 #include <boost/core/lightweight_test.hpp>
 #include <string>
+#include <array>
 
 void basic_tests()
 {
@@ -71,11 +72,28 @@ void bad_input()
     BOOST_TEST_EQ(message_1_result[3], 0x0);
 }
 
+void test_class()
+{
+    boost::crypt::detail::md5 hasher;
+    constexpr auto msg = "The quick brown fox jumps over the lazy dog";
+    hasher.process_bytes(msg, std::strlen(msg));
+    std::array<std::uint32_t, 4> message_1_result {};
+    hasher.get_digest(message_1_result.begin(), message_1_result.size());
+
+    BOOST_TEST_EQ(message_1_result[0], 0x9e107d9d);
+    BOOST_TEST_EQ(message_1_result[1], 0x372bb682);
+    BOOST_TEST_EQ(message_1_result[2], 0x6bd81d35);
+    BOOST_TEST_EQ(message_1_result[3], 0x42a419d6);
+}
+
+
 int main()
 {
     basic_tests();
     string_test();
     bad_input();
+
+    test_class();
 
     return boost::report_errors();
 }
