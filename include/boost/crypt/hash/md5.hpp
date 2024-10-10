@@ -10,6 +10,9 @@
 #include <boost/crypt/utility/byte.hpp>
 #include <boost/crypt/utility/array.hpp>
 #include <boost/crypt/utility/cstdint.hpp>
+#include <boost/crypt/utility/type_traits.hpp>
+#include <boost/crypt/utility/strlen.hpp>
+#include <boost/crypt/utility/cstddef.hpp>
 
 #ifndef BOOST_CRYPT_BUILD_MODULE
 #include <string>
@@ -209,7 +212,7 @@ auto md5_impl(ForwardIterator first, ForwardIterator last) -> ResultType
 
 } // namespace detail
 
-template <typename ResultType = std::array<boost::crypt::uint32_t, 4>, typename T>
+template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>, typename T>
 ResultType md5(T begin, T end)
 {
     if (end <= begin)
@@ -220,7 +223,7 @@ ResultType md5(T begin, T end)
     return detail::md5_impl<ResultType>(begin, end);
 }
 
-template <typename ResultType = std::array<boost::crypt::uint32_t, 4>>
+template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
 ResultType md5(const char* str)
 {
     if (str == nullptr)
@@ -232,7 +235,7 @@ ResultType md5(const char* str)
     return detail::md5_impl<ResultType>(str, str + message_len);
 }
 
-template <typename ResultType = std::array<boost::crypt::uint32_t, 4>>
+template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
 ResultType md5(const std::string& str)
 {
     return md5(str.begin(), str.end());
