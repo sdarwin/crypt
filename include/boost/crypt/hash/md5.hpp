@@ -132,8 +132,7 @@ public:
         BOOST_CRYPT_REQUIRES_CONVERSION(ByteType, boost::crypt::uint8_t);
 
     template <typename ForwardIter>
-    constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
-        BOOST_CRYPT_REQUIRES_CONVERSION(boost::crypt::uint8_t, decltype(*buffer));
+    constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
 
     template <typename DigestType>
     constexpr auto get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept;
@@ -277,7 +276,6 @@ constexpr auto md5::process_byte(ByteType byte) noexcept
 
 template <typename ForwardIter>
 constexpr auto md5::process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
-    BOOST_CRYPT_REQUIRES_CONVERSION(boost::crypt::uint8_t, decltype(*buffer))
 {
     md5_update(buffer, byte_count);
 }
