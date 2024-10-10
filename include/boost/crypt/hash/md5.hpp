@@ -11,13 +11,11 @@
 #include <boost/crypt/utility/array.hpp>
 #include <boost/crypt/utility/cstdint.hpp>
 
-#include <algorithm>
-#include <iterator>
-#include <array>
-#include <vector>
+#ifndef BOOST_CRYPT_BUILD_MODULE
 #include <string>
 #include <cstdint>
 #include <cstring>
+#endif
 
 namespace boost {
 namespace crypt {
@@ -49,55 +47,6 @@ static constexpr boost::crypt::array<boost::crypt::uint32_t, 64> K {
         0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
         0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
-
-template <typename T>
-auto md5_preprocess(T begin, T end) -> std::vector<boost::crypt::uint8_t>
-{
-    std::vector<boost::crypt::uint8_t> vec;
-    vec.reserve(static_cast<boost::crypt::size_t>(end - begin));
-
-    // Like std::copy but gives us the correct cast
-    std::transform(begin, end, std::back_inserter(vec),
-                   [](const auto& element) {
-                       return static_cast<boost::crypt::uint8_t>(element);
-                   });
-
-    return vec;
-}
-
-template <typename T>
-auto md5_preprocess(T begin, boost::crypt::size_t len) -> std::vector<boost::crypt::uint8_t>
-{
-    std::vector<boost::crypt::uint8_t> vec;
-    vec.reserve(len);
-
-    std::transform(begin, begin + len, std::back_inserter(vec),
-                   [](const auto& element) {
-                       return static_cast<boost::crypt::uint8_t>(element);
-                   });
-
-    return vec;
-}
-
-auto md5_pad(const std::vector<boost::crypt::uint8_t>& message) noexcept -> std::vector<boost::crypt::uint8_t>
-{
-    std::vector<boost::crypt::uint8_t> padded_message {message};
-    const boost::crypt::uint64_t original_length {message.size() * 8U};
-    padded_message.emplace_back(static_cast<boost::crypt::uint8_t>(0x80));
-
-    while ((padded_message.size() * 8U) % 512U != 448U)
-    {
-        padded_message.emplace_back(static_cast<boost::crypt::uint8_t>(0x00));
-    }
-
-    // Add the original length as a 64-bit number
-    for (boost::crypt::size_t i = 0; i < 8; ++i)
-    {
-        padded_message.emplace_back(static_cast<boost::crypt::uint8_t>((original_length >> (8 * i)) & 0xFF));
-    }
-
-    return padded_message;
-}
 
 // TODO(mborland): Replace the loop with the known statements
 auto md5_body(const boost::crypt::array<boost::crypt::uint32_t, 16>& blocks,
@@ -148,40 +97,6 @@ auto md5_body(const boost::crypt::array<boost::crypt::uint32_t, 16>& blocks,
     b += B;
     c += C;
     d += D;
-}
-
-template <typename ResultType>
-auto md5_impl(const std::vector<boost::crypt::uint8_t>& padded_message) -> ResultType
-{
-    boost::crypt::uint32_t a0 {0x67452301};
-    boost::crypt::uint32_t b0 {0xefcdab89};
-    boost::crypt::uint32_t c0 {0x98badcfe};
-    boost::crypt::uint32_t d0 {0x10325476};
-
-    boost::crypt::array<boost::crypt::uint32_t, 16> blocks {};
-
-    boost::crypt::size_t message_chunk {};
-    while (message_chunk < padded_message.size())
-    {
-        for (auto& block : blocks)
-        {
-            block = static_cast<boost::crypt::uint32_t>(
-                    (static_cast<boost::crypt::uint32_t>(padded_message[message_chunk])) +
-                    (static_cast<boost::crypt::uint32_t>(padded_message[message_chunk + 1U]) << 8U) +
-                    (static_cast<boost::crypt::uint32_t>(padded_message[message_chunk + 2U]) << 16U) +
-                    (static_cast<boost::crypt::uint32_t>(padded_message[message_chunk + 3U]) << 24U)
-            );
-
-            message_chunk += 4U;
-        }
-
-        md5_body(blocks, a0, b0, c0, d0);
-    }
-
-    return ResultType {swap_endian(a0),
-                       swap_endian(b0),
-                       swap_endian(c0),
-                       swap_endian(d0)};
 }
 
 template <typename ResultType, typename ForwardIterator>
@@ -302,9 +217,7 @@ ResultType md5(T begin, T end)
         return ResultType {0, 0, 0, 0};
     }
 
-    const auto message {detail::md5_preprocess(begin, end)};
-    const auto padded_message {detail::md5_pad(message)};
-    return detail::md5_impl<ResultType>(padded_message);
+    return detail::md5_impl<ResultType>(begin, end);
 }
 
 template <typename ResultType = std::array<boost::crypt::uint32_t, 4>>
