@@ -44,6 +44,7 @@ void basic_tests()
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
+                break;
             }
         }
     }
@@ -61,6 +62,7 @@ void string_test()
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
+                break;
             }
         }
     }
@@ -80,6 +82,7 @@ void string_view_test()
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
+                break;
             }
         }
     }
@@ -103,8 +106,7 @@ void test_class()
     {
         const auto msg {std::get<0>(test_value)};
         hasher.process_bytes(msg, std::strlen(msg));
-        std::array<std::uint32_t, 4> message_result {};
-        hasher.get_digest(message_result.begin(), message_result.size());
+        const auto message_result {hasher.get_digest()};
 
         const auto valid_result {std::get<1>(test_value)};
         for (std::size_t i {}; i < message_result.size(); ++i)
@@ -112,6 +114,7 @@ void test_class()
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
+                break;
             }
         }
 

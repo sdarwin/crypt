@@ -87,8 +87,7 @@ public:
     template <typename ForwardIter>
     BOOST_CRYPT_GPU_ENABLED constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
 
-    template <typename DigestType>
-    BOOST_CRYPT_GPU_ENABLED constexpr auto get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto get_digest() noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>;
 };
 
 BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::init() noexcept -> void
@@ -176,9 +175,9 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_update(ForwardIter data, 
     }
 }
 
-template <typename DigestType>
-BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::get_digest() noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
+    boost::crypt::array<boost::crypt::uint8_t, 16> digest {};
     auto used {(low_ >> 3U) & 0x3F}; // Number of bytes used in buffer
     buffer_[used++] = 0x80;
     auto available {buffer_.size() - used};
@@ -196,7 +195,7 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::get_digest(DigestType digest,
         fill_array(buffer_.begin() + used, buffer_.end() - 8, static_cast<boost::crypt::uint8_t>(0));
     }
 
-    uint64_t total_bits = (static_cast<uint64_t>(high_) << 32) | low_;
+    const auto total_bits {(static_cast<uint64_t>(high_) << 32) | low_};
 
     // Append the length in bits as a 64-bit little-endian integer
     buffer_[56] = static_cast<boost::crypt::uint8_t>(total_bits & 0xFF);
@@ -211,13 +210,16 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::get_digest(DigestType digest,
     md5_convert_buffer_to_blocks();
     md5_body();
 
-    if (digest_size >= 4)
+    for (boost::crypt::size_t i = 0; i < 4; ++i)
     {
-        digest[0] = detail::swap_endian(a0_);
-        digest[1] = detail::swap_endian(b0_);
-        digest[2] = detail::swap_endian(c0_);
-        digest[3] = detail::swap_endian(d0_);
+        const auto value {(i == 0 ? a0_ : (i == 1 ? b0_ : (i == 2 ? c0_ : d0_)))};
+        digest[i*4]     = static_cast<boost::crypt::uint8_t>(value & 0xFF);
+        digest[i*4 + 1] = static_cast<boost::crypt::uint8_t>((value >> 8U) & 0xFF);
+        digest[i*4 + 2] = static_cast<boost::crypt::uint8_t>((value >> 16U) & 0xFF);
+        digest[i*4 + 3] = static_cast<boost::crypt::uint8_t>((value >> 24U) & 0xFF);
     }
+
+    return digest;
 }
 
 template <typename ByteType>
@@ -282,51 +284,47 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_body() noexcept -> void
     d0_ += D;
 }
 
-template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>, typename T>
-BOOST_CRYPT_GPU_ENABLED constexpr ResultType md5(T begin, T end) noexcept
+template <typename T>
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(T begin, T end) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     if (end < begin)
     {
-        return ResultType {0, 0, 0, 0};
+        return boost::crypt::array<boost::crypt::uint8_t, 16> {};
     }
     else if (end == begin)
     {
-        return ResultType{0xd41d8cd9, 0x8f00b204, 0xe9800998, 0xecf8427e};
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{0xd4, 0x1d, 0x8c, 0xd9, 0x8f, 0x00, 0xb2, 0x04, 0xe9, 0x80, 0x09, 0x98, 0xec, 0xf8, 0x42, 0x7e};
     }
 
     boost::crypt::md5_hasher hasher;
     hasher.process_bytes(begin, static_cast<boost::crypt::size_t>(end - begin));
-    ResultType result;
-    hasher.get_digest(result.begin(), result.size());
+    auto result {hasher.get_digest()};
 
     return result;
 }
 
-template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
-BOOST_CRYPT_GPU_ENABLED ResultType md5(const char* str) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     if (str == nullptr)
     {
-        return ResultType {0, 0, 0, 0};
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
     }
 
     const auto message_len {std::strlen(str)};
-    return md5<ResultType>(str, str + message_len);
+    return md5(str, str + message_len);
 }
 
 // ----- String and String view aren't in the libcu++ STL so they so not have device markers -----
 
-template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
-constexpr ResultType md5(const std::string& str) noexcept
+inline auto md5(const std::string& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
-    return md5<ResultType>(str.begin(), str.end());
+    return md5(str.begin(), str.end());
 }
 
 #ifdef BOOST_CRYPT_HAS_STRING_VIEW
-template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
-constexpr ResultType md5(const std::string_view& str)
+inline auto md5(const std::string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
-    return md5<ResultType>(str.begin(), str.end());
+    return md5(str.begin(), str.end());
 }
 #endif
 
