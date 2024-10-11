@@ -16,18 +16,18 @@ namespace detail {
 
 // Forward decls
 template <typename T, typename U, boost::crypt::enable_if_t<boost::crypt::is_unsigned<U>::value, bool> = true>
-constexpr T rotl(T x, U s) noexcept;
+BOOST_CRYPT_GPU_ENABLED constexpr T rotl(T x, U s) noexcept;
 template <typename T, typename U, boost::crypt::enable_if_t<!boost::crypt::is_unsigned<U>::value, bool> = true>
-constexpr T rotl(T x, U s) noexcept;
+BOOST_CRYPT_GPU_ENABLED constexpr T rotl(T x, U s) noexcept;
 
 template <typename T, typename U, boost::crypt::enable_if_t<boost::crypt::is_unsigned<U>::value, bool> = true>
-constexpr T rotr(T x, U s) noexcept;
+BOOST_CRYPT_GPU_ENABLED constexpr T rotr(T x, U s) noexcept;
 template <typename T, typename U, boost::crypt::enable_if_t<!boost::crypt::is_unsigned<U>::value, bool> = true>
-constexpr T rotr(T x, U s) noexcept;
+BOOST_CRYPT_GPU_ENABLED constexpr T rotr(T x, U s) noexcept;
 
 // Only works for unsigned s so we can optimize away the call to rotr
 template <typename T, typename U, boost::crypt::enable_if_t<boost::crypt::is_unsigned<U>::value, bool>>
-constexpr T rotl(T x, U s) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr T rotl(T x, U s) noexcept
 {
     constexpr auto N {boost::crypt::numeric_limits<T>::digits};
     const auto r {s % N};
@@ -41,7 +41,7 @@ constexpr T rotl(T x, U s) noexcept
 }
 
 template <typename T, typename U, boost::crypt::enable_if_t<!boost::crypt::is_unsigned<U>::value, bool>>
-constexpr T rotl(T x, U s) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr T rotl(T x, U s) noexcept
 {
     constexpr auto N {boost::crypt::numeric_limits<T>::digits};
     const auto r {s % N};
@@ -59,7 +59,7 @@ constexpr T rotl(T x, U s) noexcept
 }
 
 template <typename T, typename U, boost::crypt::enable_if_t<boost::crypt::is_unsigned<U>::value, bool>>
-constexpr T rotr(T x, U s) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr T rotr(T x, U s) noexcept
 {
     constexpr auto N {boost::crypt::numeric_limits<T>::digits};
     const auto r {s % N};
@@ -73,7 +73,7 @@ constexpr T rotr(T x, U s) noexcept
 }
 
 template <typename T, typename U, boost::crypt::enable_if_t<!boost::crypt::is_unsigned<U>::value, bool>>
-constexpr T rotr(T x, U s) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr T rotr(T x, U s) noexcept
 {
     constexpr auto N {boost::crypt::numeric_limits<T>::digits};
     const auto r {s % N};
@@ -90,7 +90,7 @@ constexpr T rotr(T x, U s) noexcept
     return (x >> r) | (x << (N - r));
 }
 
-constexpr auto swap_endian(const boost::crypt::uint32_t val) -> boost::crypt::uint32_t
+BOOST_CRYPT_GPU_ENABLED constexpr auto swap_endian(const boost::crypt::uint32_t val) -> boost::crypt::uint32_t
 {
     return ((val & 0xFF000000) >> 24U) |
            ((val & 0x00FF0000) >> 8U)  |

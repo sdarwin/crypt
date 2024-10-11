@@ -68,30 +68,30 @@ private:
     boost::crypt::array<boost::crypt::uint32_t, 16> blocks_ {};
 
     template <typename ForwardIter>
-    constexpr auto md5_update(ForwardIter data, boost::crypt::size_t size) noexcept;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto md5_update(ForwardIter data, boost::crypt::size_t size) noexcept;
 
-    constexpr auto md5_convert_buffer_to_blocks() noexcept;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto md5_convert_buffer_to_blocks() noexcept;
 
     template <typename ForwardIter>
-    constexpr auto md5_copy_data(ForwardIter data, boost::crypt::size_t offset, boost::crypt::size_t size) noexcept;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto md5_copy_data(ForwardIter data, boost::crypt::size_t offset, boost::crypt::size_t size) noexcept;
 
-    constexpr auto md5_body() noexcept -> void;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto md5_body() noexcept -> void;
 
 public:
-    constexpr auto init() noexcept -> void;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto init() noexcept -> void;
 
     template <typename ByteType>
-    constexpr auto process_byte(ByteType byte) noexcept
+    BOOST_CRYPT_GPU_ENABLED constexpr auto process_byte(ByteType byte) noexcept
         BOOST_CRYPT_REQUIRES_CONVERSION(ByteType, boost::crypt::uint8_t);
 
     template <typename ForwardIter>
-    constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
 
     template <typename DigestType>
-    constexpr auto get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept;
+    BOOST_CRYPT_GPU_ENABLED constexpr auto get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept;
 };
 
-constexpr auto md5_hasher::init() noexcept -> void
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::init() noexcept -> void
 {
     a0_ = 0x67452301U;
     b0_ = 0xefcdab89U;
@@ -105,7 +105,7 @@ constexpr auto md5_hasher::init() noexcept -> void
     blocks_.fill(0U);
 }
 
-constexpr auto md5_hasher::md5_convert_buffer_to_blocks() noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_convert_buffer_to_blocks() noexcept
 {
     boost::crypt::size_t buffer_index {};
     for (auto& block : blocks_)
@@ -122,7 +122,7 @@ constexpr auto md5_hasher::md5_convert_buffer_to_blocks() noexcept
 }
 
 template <typename ForwardIter>
-constexpr auto md5_hasher::md5_copy_data(ForwardIter data, boost::crypt::size_t offset, boost::crypt::size_t size) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_copy_data(ForwardIter data, boost::crypt::size_t offset, boost::crypt::size_t size) noexcept
 {
     for (boost::crypt::size_t i {}; i < size; ++i)
     {
@@ -132,7 +132,7 @@ constexpr auto md5_hasher::md5_copy_data(ForwardIter data, boost::crypt::size_t 
 }
 
 template <typename ForwardIter>
-constexpr auto md5_hasher::md5_update(ForwardIter data, boost::crypt::size_t size) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_update(ForwardIter data, boost::crypt::size_t size) noexcept
 {
     const auto input_bits {size << 3U}; // Convert size to bits
     const auto old_low {low_};
@@ -177,7 +177,7 @@ constexpr auto md5_hasher::md5_update(ForwardIter data, boost::crypt::size_t siz
 }
 
 template <typename DigestType>
-constexpr auto md5_hasher::get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::get_digest(DigestType digest, boost::crypt::size_t digest_size) noexcept
 {
     auto used {(low_ >> 3U) & 0x3F}; // Number of bytes used in buffer
     buffer_[used++] = 0x80;
@@ -221,20 +221,20 @@ constexpr auto md5_hasher::get_digest(DigestType digest, boost::crypt::size_t di
 }
 
 template <typename ByteType>
-constexpr auto md5_hasher::process_byte(ByteType byte) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::process_byte(ByteType byte) noexcept
     BOOST_CRYPT_REQUIRES_CONVERSION(ByteType, boost::crypt::uint8_t)
 {
     md5_update(&byte, 1UL);
 }
 
 template <typename ForwardIter>
-constexpr auto md5_hasher::process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
 {
     md5_update(buffer, byte_count);
 }
 
 // TODO(mborland): Replace the loop with the known statements
-constexpr auto md5_hasher::md5_body() noexcept -> void
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_body() noexcept -> void
 {
     boost::crypt::uint32_t A {a0_};
     boost::crypt::uint32_t B {b0_};
@@ -283,7 +283,7 @@ constexpr auto md5_hasher::md5_body() noexcept -> void
 }
 
 template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>, typename T>
-ResultType md5(T begin, T end)
+BOOST_CRYPT_GPU_ENABLED constexpr ResultType md5(T begin, T end) noexcept
 {
     if (end < begin)
     {
@@ -303,7 +303,7 @@ ResultType md5(T begin, T end)
 }
 
 template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
-ResultType md5(const char* str)
+BOOST_CRYPT_GPU_ENABLED ResultType md5(const char* str) noexcept
 {
     if (str == nullptr)
     {
@@ -314,15 +314,17 @@ ResultType md5(const char* str)
     return md5<ResultType>(str, str + message_len);
 }
 
+// ----- String and String view aren't in the libcu++ STL so they so not have device markers -----
+
 template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
-ResultType md5(const std::string& str)
+constexpr ResultType md5(const std::string& str) noexcept
 {
     return md5<ResultType>(str.begin(), str.end());
 }
 
 #ifdef BOOST_CRYPT_HAS_STRING_VIEW
 template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>>
-ResultType md5(const std::string_view& str)
+constexpr ResultType md5(const std::string_view& str)
 {
     return md5<ResultType>(str.begin(), str.end());
 }

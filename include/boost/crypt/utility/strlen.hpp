@@ -12,7 +12,7 @@ namespace crypt {
 namespace utility {
 
 template <typename ForwardIter>
-constexpr auto strlen(ForwardIter str) noexcept -> boost::crypt::size_t
+BOOST_CRYPT_GPU_ENABLED constexpr auto strlen(ForwardIter str) noexcept -> boost::crypt::size_t
 {
     boost::crypt::size_t len {};
     while (*(str + len) != static_cast<decltype(*str)>('\0'))
