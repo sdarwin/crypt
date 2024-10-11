@@ -15,6 +15,12 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, std::size_t size
         std::string c_data_str {c_data, size}; // Guarantee null termination since we can't pass the size argument
 
         boost::crypt::md5(c_data_str);
+        boost::crypt::md5(c_data, size);
+
+        #ifdef BOOST_CRYPT_HAS_STRING_VIEW
+        std::string_view view {c_data_str};
+        boost::crypt::md5(view);
+        #endif
     }
     catch(...)
     {
