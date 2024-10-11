@@ -393,9 +393,13 @@ auto md5_impl(ForwardIterator first, ForwardIterator last) -> ResultType
 template <typename ResultType = boost::crypt::array<boost::crypt::uint32_t, 4>, typename T>
 ResultType md5(T begin, T end)
 {
-    if (end <= begin)
+    if (end < begin)
     {
         return ResultType {0, 0, 0, 0};
+    }
+    else if (end == begin)
+    {
+        return ResultType{0xd41d8cd9, 0x8f00b204, 0xe9800998, 0xecf8427e};
     }
 
     return detail::md5_impl<ResultType>(begin, end);
