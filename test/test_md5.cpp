@@ -85,7 +85,7 @@ void bad_input()
 
 void test_class()
 {
-    boost::crypt::detail::md5 hasher;
+    boost::crypt::md5_hasher hasher;
 
     for (const auto& test_value : test_values)
     {
