@@ -346,6 +346,8 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_body() noexcept -> void
     d0_ += d;
 }
 
+namespace detail {
+
 template <typename T>
 BOOST_CRYPT_GPU_ENABLED constexpr auto md5(T begin, T end) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
@@ -355,7 +357,9 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(T begin, T end) noexcept -> boost::cr
     }
     else if (end == begin)
     {
-        return boost::crypt::array<boost::crypt::uint8_t, 16>{0xd4, 0x1d, 0x8c, 0xd9, 0x8f, 0x00, 0xb2, 0x04, 0xe9, 0x80, 0x09, 0x98, 0xec, 0xf8, 0x42, 0x7e};
+        return boost::crypt::array<boost::crypt::uint8_t, 16> {
+                0xd4, 0x1d, 0x8c, 0xd9, 0x8f, 0x00, 0xb2, 0x04, 0xe9, 0x80, 0x09, 0x98, 0xec, 0xf8, 0x42, 0x7e
+        };
     }
 
     boost::crypt::md5_hasher hasher;
@@ -365,6 +369,8 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(T begin, T end) noexcept -> boost::cr
     return result;
 }
 
+} // Namespace detail
+
 BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     if (str == nullptr)
@@ -373,7 +379,7 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str) noexcept -> boost::c
     }
 
     const auto message_len {utility::strlen(str)};
-    return md5(str, str + message_len);
+    return detail::md5(str, str + message_len);
 }
 
 BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str, boost::crypt::size_t len) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
@@ -383,20 +389,20 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str, boost::crypt::size_t
         return boost::crypt::array<boost::crypt::uint8_t, 16>{};
     }
 
-    return md5(str, str + len);
+    return detail::md5(str, str + len);
 }
 
 // ----- String and String view aren't in the libcu++ STL so they so not have device markers -----
 
 inline auto md5(const std::string& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
-    return md5(str.begin(), str.end());
+    return detail::md5(str.begin(), str.end());
 }
 
 #ifdef BOOST_CRYPT_HAS_STRING_VIEW
 inline auto md5(const std::string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
-    return md5(str.begin(), str.end());
+    return detail::md5(str.begin(), str.end());
 }
 #endif
 
