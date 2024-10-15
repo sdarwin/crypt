@@ -16,6 +16,7 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, std::size_t size
 
         boost::crypt::md5(c_data_str);
         boost::crypt::md5(c_data, size);
+        boost::crypt::md5(data, size);
 
         #ifdef BOOST_CRYPT_HAS_STRING_VIEW
         std::string_view view {c_data_str};

@@ -91,11 +91,29 @@ void string_view_test()
 
 void bad_input()
 {
-    const auto null_message {boost::crypt::md5(nullptr)};
+    const auto null_message {boost::crypt::md5(static_cast<const char*>(nullptr))};
     BOOST_TEST_EQ(null_message[0], 0x0);
     BOOST_TEST_EQ(null_message[1], 0x0);
     BOOST_TEST_EQ(null_message[2], 0x0);
     BOOST_TEST_EQ(null_message[3], 0x0);
+
+    const auto null_message_len {boost::crypt::md5(static_cast<const char*>(nullptr), 100)};
+    BOOST_TEST_EQ(null_message_len[0], 0x0);
+    BOOST_TEST_EQ(null_message_len[1], 0x0);
+    BOOST_TEST_EQ(null_message_len[2], 0x0);
+    BOOST_TEST_EQ(null_message_len[3], 0x0);
+
+    const auto unsigned_null_message {boost::crypt::md5(static_cast<const std::uint8_t*>(nullptr))};
+    BOOST_TEST_EQ(unsigned_null_message[0], 0x0);
+    BOOST_TEST_EQ(unsigned_null_message[1], 0x0);
+    BOOST_TEST_EQ(unsigned_null_message[2], 0x0);
+    BOOST_TEST_EQ(unsigned_null_message[3], 0x0);
+
+    const auto unsigned_null_message_len {boost::crypt::md5(static_cast<const std::uint8_t*>(nullptr), 100)};
+    BOOST_TEST_EQ(unsigned_null_message_len[0], 0x0);
+    BOOST_TEST_EQ(unsigned_null_message_len[1], 0x0);
+    BOOST_TEST_EQ(unsigned_null_message_len[2], 0x0);
+    BOOST_TEST_EQ(unsigned_null_message_len[3], 0x0);
 }
 
 void test_class()
