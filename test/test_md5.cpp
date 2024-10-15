@@ -181,6 +181,13 @@ void bad_input()
     BOOST_TEST_EQ(unsigned_null_message_len[1], 0x0);
     BOOST_TEST_EQ(unsigned_null_message_len[2], 0x0);
     BOOST_TEST_EQ(unsigned_null_message_len[3], 0x0);
+    
+    std::string test_str {"Test string"};
+    const auto reveresed_input {boost::crypt::detail::md5(test_str.end(), test_str.begin())};
+    BOOST_TEST_EQ(reveresed_input[0], 0x0);
+    BOOST_TEST_EQ(reveresed_input[1], 0x0);
+    BOOST_TEST_EQ(reveresed_input[2], 0x0);
+    BOOST_TEST_EQ(reveresed_input[3], 0x0);
 }
 
 void test_class()
@@ -263,6 +270,7 @@ void test_random_piecewise_values()
 
         boost_hasher.process_bytes(str, current_str_len);
         boost_hasher.process_bytes(str_2, current_str_len);
+        boost_hasher.process_byte(52); // "4"
         unsigned char digest[16];
         boost_hasher.get_digest(digest);
 
@@ -274,6 +282,7 @@ void test_random_piecewise_values()
 
         md5_hasher.process_bytes(str, current_str_len);
         md5_hasher.process_bytes(str_2, current_str_len);
+        md5_hasher.process_byte(52); // "4"
         const auto crypt_res {md5_hasher.get_digest()};
 
         for (std::size_t j {}; j < crypt_res.size(); ++j)
