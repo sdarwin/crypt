@@ -240,6 +240,58 @@ void test_random_values()
     delete[] str;
 }
 
+void test_random_piecewise_values()
+{
+    constexpr std::size_t max_str_len {65535U};
+    std::mt19937_64 rng(42);
+    std::uniform_int_distribution<std::size_t> str_len(1, max_str_len - 1);
+
+    char* str {new char[max_str_len]};
+    char* str_2 {new char[max_str_len]};
+
+    for (std::size_t i {}; i < 1024; ++i)
+    {
+        boost::uuids::detail::md5 boost_hasher;
+        boost::crypt::md5_hasher md5_hasher;
+
+        std::memset(str, '\0', max_str_len);
+        std::memset(str_2, '\0', max_str_len);
+
+        const std::size_t current_str_len {str_len(rng)};
+        generate_random_cstring(str, current_str_len);
+        generate_random_cstring(str_2, current_str_len);
+
+        boost_hasher.process_bytes(str, current_str_len);
+        boost_hasher.process_bytes(str_2, current_str_len);
+        unsigned char digest[16];
+        boost_hasher.get_digest(digest);
+
+        std::array<unsigned char, 16> uuid_res {};
+        for (std::size_t j {}; j < 16U; ++j)
+        {
+            uuid_res[j] = digest[j];
+        }
+
+        md5_hasher.process_bytes(str, current_str_len);
+        md5_hasher.process_bytes(str_2, current_str_len);
+        const auto crypt_res {md5_hasher.get_digest()};
+
+        for (std::size_t j {}; j < crypt_res.size(); ++j)
+        {
+            if (!BOOST_TEST_EQ(uuid_res[j], crypt_res[j]))
+            {
+                // LCOV_EXCL_START
+                std::cerr << "Failure with string: " << str << std::endl;
+                break;
+                // LCOV_EXCL_STOP
+            }
+        }
+    }
+
+    delete[] str;
+    delete[] str_2;
+}
+
 int main()
 {
     basic_tests();
@@ -252,6 +304,7 @@ int main()
     test_class();
 
     test_random_values();
+    test_random_piecewise_values();
 
     return boost::report_errors();
 }
