@@ -49,6 +49,9 @@ jobs:
           git submodule update --init libs/predef
           git submodule update --init libs/static_assert
           git submodule update --init libs/test
+          git submodule update --init libs/uuid
+          git submodule update --init libs/throw_exception
+          git submodule update --init libs/type_traits
           ./bootstrap.sh
           ./b2 headers
       - name: gcc-gcov-native
