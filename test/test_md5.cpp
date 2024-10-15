@@ -6,10 +6,71 @@
 
 #include <boost/crypt/hash/md5.hpp>
 #include <boost/core/lightweight_test.hpp>
+
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wconversion"
+#  pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wconversion"
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
+#include <boost/uuid/detail/md5.hpp>
+
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
+
+
+#include <random>
 #include <iostream>
 #include <string>
 #include <array>
 #include <tuple>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
+
+void generate_random_cstring(char* str, std::size_t length)
+{
+
+    const char charset[] = "0123456789"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyz";
+
+    const std::size_t charset_size = sizeof(charset) - 1;
+
+    std::mt19937_64 rng(42);
+    std::uniform_int_distribution<int> dist(0, charset_size);
+
+    for (std::size_t i = 0; i < length - 1; ++i)
+    {
+        int index = dist(rng);
+        str[i] = charset[index];
+    }
+
+    str[length - 1] = '\0';
+}
+
+auto get_boost_uuid_result(const char* str, size_t length)
+{
+    unsigned char digest[16];
+    boost::uuids::detail::md5 hasher;
+    hasher.process_bytes(str, length);
+    hasher.get_digest(digest);
+
+    std::array<unsigned char, 16> return_array {};
+    for (std::size_t i {}; i < 16U; ++i)
+    {
+        return_array[i] = digest[i];
+    }
+
+    return return_array;
+}
 
 constexpr std::array<std::tuple<const char*, std::array<uint16_t, 16>>, 9> test_values =
 {
@@ -43,8 +104,10 @@ void basic_tests()
         {
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
+                // LCOV_EXCL_START
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
                 break;
+                // LCOV_EXCL_STOP
             }
         }
     }
@@ -61,8 +124,10 @@ void string_test()
         {
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
+                // LCOV_EXCL_START
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
                 break;
+                // LCOV_EXCL_STOP
             }
         }
     }
@@ -81,8 +146,10 @@ void string_view_test()
         {
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
+                // LCOV_EXCL_START
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
                 break;
+                // LCOV_EXCL_STOP
             }
         }
     }
@@ -131,13 +198,46 @@ void test_class()
         {
             if (!BOOST_TEST_EQ(message_result[i], valid_result[i]))
             {
+                // LCOV_EXCL_START
                 std::cerr << "Failure with: " << std::get<0>(test_value) << '\n';
                 break;
+                // LCOV_EXCL_STOP
             }
         }
 
         hasher.init();
     }
+}
+
+void test_random_values()
+{
+    constexpr std::size_t max_str_len {65535U};
+    std::mt19937_64 rng(42);
+    std::uniform_int_distribution<std::size_t> str_len(1, max_str_len - 1);
+
+    char* str {new char[max_str_len]};
+
+    for (std::size_t i {}; i < 1024; ++i)
+    {
+        std::memset(str, '\0', max_str_len);
+        const std::size_t current_str_len {str_len(rng)};
+        generate_random_cstring(str, current_str_len);
+        const auto uuid_res {get_boost_uuid_result(str, current_str_len)};
+        const auto crypt_res {boost::crypt::md5(str, current_str_len)};
+
+        for (std::size_t j {}; j < crypt_res.size(); ++j)
+        {
+            if (!BOOST_TEST_EQ(uuid_res[j], crypt_res[j]))
+            {
+                // LCOV_EXCL_START
+                std::cerr << "Failure with string: " << str << std::endl;
+                break;
+                // LCOV_EXCL_STOP
+            }
+        }
+    }
+
+    delete[] str;
 }
 
 int main()
@@ -150,6 +250,8 @@ int main()
     bad_input();
 
     test_class();
+
+    test_random_values();
 
     return boost::report_errors();
 }

@@ -11,6 +11,8 @@ import testing ;
 
 project : requirements
 
+  <library>/boost/uuid//boost_uuid
+
   <toolset>gcc:<cxxflags>-Wall
   <toolset>gcc:<cxxflags>-Wextra
 
