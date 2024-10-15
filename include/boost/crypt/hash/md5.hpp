@@ -118,7 +118,8 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_update(ForwardIter data, 
     low_ += input_bits;
     if (low_ < old_low)
     {
-        ++high_;
+        // This should never happen as it indicates size_t roll over
+        ++high_; // LCOV_EXCL_LINE
     }
     high_ += size >> 29U;
 
