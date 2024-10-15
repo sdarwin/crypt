@@ -13,7 +13,7 @@
 namespace boost {
 namespace crypt {
 
-inline void generate_random_cstring(char* str, std::size_t length)
+inline void generate_random_string(char* str, std::size_t length)
 {
 
     const char charset[] = "0123456789"
@@ -34,7 +34,7 @@ inline void generate_random_cstring(char* str, std::size_t length)
     str[length - 1] = '\0';
 }
 
-inline void generate_random_u16string(char16_t* str, std::size_t length)
+inline void generate_random_string(char16_t* str, std::size_t length)
 {
     const char16_t charset[] = u"0123456789"
                                u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -54,7 +54,7 @@ inline void generate_random_u16string(char16_t* str, std::size_t length)
     str[length - 1] = u'\0';
 }
 
-inline void generate_random_u32string(char16_t* str, std::size_t length)
+inline void generate_random_string(char32_t* str, std::size_t length)
 {
     const char32_t charset[] = U"0123456789"
                                U"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -74,7 +74,7 @@ inline void generate_random_u32string(char16_t* str, std::size_t length)
     str[length - 1] = u'\0';
 }
 
-inline void generate_random_wstring(wchar_t* str, std::size_t length)
+inline void generate_random_string(wchar_t* str, std::size_t length)
 {
     const wchar_t charset[] = L"0123456789"
                               L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"

@@ -195,6 +195,7 @@ void test_class()
     }
 }
 
+template <typename T>
 void test_random_values()
 {
     constexpr std::size_t max_str_len {65535U};
@@ -207,7 +208,7 @@ void test_random_values()
     {
         std::memset(str, '\0', max_str_len);
         const std::size_t current_str_len {str_len(rng)};
-        boost::crypt::generate_random_cstring(str, current_str_len);
+        boost::crypt::generate_random_string(str, current_str_len);
         const auto uuid_res {get_boost_uuid_result(str, current_str_len)};
         const auto crypt_res {boost::crypt::md5(str, current_str_len)};
 
@@ -226,6 +227,7 @@ void test_random_values()
     delete[] str;
 }
 
+template <typename T>
 void test_random_piecewise_values()
 {
     constexpr std::size_t max_str_len {65535U};
@@ -244,8 +246,8 @@ void test_random_piecewise_values()
         std::memset(str_2, '\0', max_str_len);
 
         const std::size_t current_str_len {str_len(rng)};
-        boost::crypt::generate_random_cstring(str, current_str_len);
-        boost::crypt::generate_random_cstring(str_2, current_str_len);
+        boost::crypt::generate_random_string(str, current_str_len);
+        boost::crypt::generate_random_string(str_2, current_str_len);
 
         boost_hasher.process_bytes(str, current_str_len);
         boost_hasher.process_bytes(str_2, current_str_len);
@@ -291,8 +293,17 @@ int main()
 
     test_class();
 
-    test_random_values();
-    test_random_piecewise_values();
+    test_random_values<char>();
+    test_random_piecewise_values<char>();
+
+    test_random_values<char16_t>();
+    test_random_piecewise_values<char16_t>();
+
+    test_random_values<char32_t>();
+    test_random_piecewise_values<char32_t>();
+
+    test_random_values<wchar_t>();
+    test_random_piecewise_values<wchar_t>();
 
     return boost::report_errors();
 }
