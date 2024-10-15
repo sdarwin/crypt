@@ -392,6 +392,27 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str, boost::crypt::size_t
     return detail::md5(str, str + len);
 }
 
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const boost::crypt::uint8_t* str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+    }
+
+    const auto message_len {utility::strlen(str)};
+    return detail::md5(str, str + message_len);
+}
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const boost::crypt::uint8_t* str, boost::crypt::size_t len) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+    }
+
+    return detail::md5(str, str + len);
+}
+
 // ----- String and String view aren't in the libcu++ STL so they so not have device markers -----
 
 inline auto md5(const std::string& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
