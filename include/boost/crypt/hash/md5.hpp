@@ -375,7 +375,7 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str) noexcept -> boost::c
 {
     if (str == nullptr)
     {
-        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
     }
 
     const auto message_len {utility::strlen(str)};
@@ -386,7 +386,7 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str, boost::crypt::size_t
 {
     if (str == nullptr)
     {
-        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
     }
 
     return detail::md5(str, str + len);
@@ -396,7 +396,7 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const boost::crypt::uint8_t* str) noe
 {
     if (str == nullptr)
     {
-        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
     }
 
     const auto message_len {utility::strlen(str)};
@@ -407,7 +407,7 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const boost::crypt::uint8_t* str, boo
 {
     if (str == nullptr)
     {
-        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
     }
 
     return detail::md5(str, str + len);
