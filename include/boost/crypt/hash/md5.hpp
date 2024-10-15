@@ -1,6 +1,8 @@
 // Copyright 2024 Matt Borland
 // Distributed under the Boost Software License, Version 1.0.
 // https://www.boost.org/LICENSE_1_0.txt
+//
+// See: https://www.ietf.org/rfc/rfc1321.txt
 
 #ifndef BOOST_CRYPT_HASH_MD5_HPP
 #define BOOST_CRYPT_HASH_MD5_HPP
@@ -13,8 +15,10 @@
 #include <boost/crypt/utility/type_traits.hpp>
 #include <boost/crypt/utility/strlen.hpp>
 #include <boost/crypt/utility/cstddef.hpp>
+#include <boost/crypt/utility/iterator.hpp>
 
 #ifndef BOOST_CRYPT_BUILD_MODULE
+#include <memory>
 #include <string>
 #include <cstdint>
 #include <cstring>
@@ -54,7 +58,13 @@ public:
     BOOST_CRYPT_GPU_ENABLED constexpr auto process_byte(ByteType byte) noexcept
         BOOST_CRYPT_REQUIRES_CONVERSION(ByteType, boost::crypt::uint8_t);
 
-    template <typename ForwardIter>
+    template <typename ForwardIter, boost::crypt::enable_if_t<sizeof(typename utility::iterator_traits<ForwardIter>::value_type) == 1, bool> = true>
+    BOOST_CRYPT_GPU_ENABLED constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
+
+    template <typename ForwardIter, boost::crypt::enable_if_t<sizeof(typename utility::iterator_traits<ForwardIter>::value_type) == 2, bool> = true>
+    BOOST_CRYPT_GPU_ENABLED constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
+
+    template <typename ForwardIter, boost::crypt::enable_if_t<sizeof(typename utility::iterator_traits<ForwardIter>::value_type) == 4, bool> = true>
     BOOST_CRYPT_GPU_ENABLED constexpr auto process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept;
 
     BOOST_CRYPT_GPU_ENABLED constexpr auto get_digest() noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>;
@@ -108,7 +118,8 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::md5_update(ForwardIter data, 
     low_ += input_bits;
     if (low_ < old_low)
     {
-        ++high_;
+        // This should never happen as it indicates size_t roll over
+        ++high_; // LCOV_EXCL_LINE
     }
     high_ += size >> 29U;
 
@@ -196,13 +207,48 @@ template <typename ByteType>
 BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::process_byte(ByteType byte) noexcept
     BOOST_CRYPT_REQUIRES_CONVERSION(ByteType, boost::crypt::uint8_t)
 {
-    md5_update(&byte, 1UL);
+    const auto value {static_cast<boost::crypt::uint8_t>(byte)};
+    md5_update(&value, 1UL);
 }
 
-template <typename ForwardIter>
+template <typename ForwardIter, boost::crypt::enable_if_t<sizeof(typename utility::iterator_traits<ForwardIter>::value_type) == 1, bool>>
 BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
 {
     md5_update(buffer, byte_count);
+}
+
+template <typename ForwardIter, boost::crypt::enable_if_t<sizeof(typename utility::iterator_traits<ForwardIter>::value_type) == 2, bool>>
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
+{
+    #ifndef BOOST_CRYPT_HAS_CUDA
+
+    const auto* char_ptr {reinterpret_cast<const char*>(std::addressof(*buffer))};
+    const auto* data {reinterpret_cast<const unsigned char*>(char_ptr)};
+    md5_update(data, byte_count * 2U);
+
+    #else
+
+    const auto* data {reinterpret_cast<const unsigned char*>(buffer)};
+    md5_update(data, byte_count * 2U);
+
+    #endif
+}
+
+template <typename ForwardIter, boost::crypt::enable_if_t<sizeof(typename utility::iterator_traits<ForwardIter>::value_type) == 4, bool>>
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5_hasher::process_bytes(ForwardIter buffer, boost::crypt::size_t byte_count) noexcept
+{
+    #ifndef BOOST_CRYPT_HAS_CUDA
+
+    const auto* char_ptr {reinterpret_cast<const char*>(std::addressof(*buffer))};
+    const auto* data {reinterpret_cast<const unsigned char*>(char_ptr)};
+    md5_update(data, byte_count * 4U);
+
+    #else
+
+    const auto* data {reinterpret_cast<const unsigned char*>(buffer)};
+    md5_update(data, byte_count * 4U);
+
+    #endif
 }
 
 // See: Applied Cryptography - Bruce Schneier
@@ -413,19 +459,120 @@ BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const boost::crypt::uint8_t* str, boo
     return detail::md5(str, str + len);
 }
 
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char16_t* str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
+    }
+
+    const auto message_len {utility::strlen(str)};
+    return detail::md5(str, str + message_len);
+}
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char16_t* str, boost::crypt::size_t len) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
+    }
+
+    return detail::md5(str, str + len);
+}
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char32_t* str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
+    }
+
+    const auto message_len {utility::strlen(str)};
+    return detail::md5(str, str + message_len);
+}
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char32_t* str, boost::crypt::size_t len) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
+    }
+
+    return detail::md5(str, str + len);
+}
+
+// On some platforms wchar_t is 16 bits and others it's 32
+// Since we check sizeof() the underlying with SFINAE in the actual implementation this is handled transparently
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const wchar_t* str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
+    }
+
+    const auto message_len {utility::strlen(str)};
+    return detail::md5(str, str + message_len);
+}
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const wchar_t* str, boost::crypt::size_t len) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    if (str == nullptr)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{}; // LCOV_EXCL_LINE
+    }
+
+    return detail::md5(str, str + len);
+}
+
 // ----- String and String view aren't in the libcu++ STL so they so not have device markers -----
+
+#ifndef BOOST_CRYPT_HAS_CUDA
 
 inline auto md5(const std::string& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
 }
 
+inline auto md5(const std::u16string& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    return detail::md5(str.begin(), str.end());
+}
+
+inline auto md5(const std::u32string& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    return detail::md5(str.begin(), str.end());
+}
+
+inline auto md5(const std::wstring& str) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    return detail::md5(str.begin(), str.end());
+}
+
 #ifdef BOOST_CRYPT_HAS_STRING_VIEW
+
 inline auto md5(const std::string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
 }
-#endif
+
+inline auto md5(const std::u16string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    return detail::md5(str.begin(), str.end());
+}
+
+inline auto md5(const std::u32string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    return detail::md5(str.begin(), str.end());
+}
+
+inline auto md5(const std::wstring_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    return detail::md5(str.begin(), str.end());
+}
+
+#endif // BOOST_CRYPT_HAS_STRING_VIEW
+
+#endif // BOOST_CRYPT_HAS_CUDA
 
 } // namespace crypt
 } // namespace boost

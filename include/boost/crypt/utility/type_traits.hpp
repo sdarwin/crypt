@@ -161,7 +161,9 @@ using cuda::std::underlying_type_t;
 
 #else // STD versions
 
+#ifndef BOOST_CRYPT_BUILD_MODULE
 #include <type_traits>
+#endif
 
 namespace boost {
 namespace crypt {
