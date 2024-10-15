@@ -23,15 +23,75 @@ inline void generate_random_cstring(char* str, std::size_t length)
     const std::size_t charset_size = sizeof(charset) - 1;
 
     std::mt19937_64 rng(42);
-    std::uniform_int_distribution<int> dist(0, charset_size);
+    std::uniform_int_distribution<std::size_t> dist(0, charset_size);
 
     for (std::size_t i = 0; i < length - 1; ++i)
     {
-        int index = dist(rng);
+        const auto index = dist(rng);
         str[i] = charset[index];
     }
 
     str[length - 1] = '\0';
+}
+
+inline void generate_random_u16string(char16_t* str, std::size_t length)
+{
+    const char16_t charset[] = u"0123456789"
+                               u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                               u"abcdefghijklmnopqrstuvwxyz";
+
+    const std::size_t charset_size = std::char_traits<char16_t>::length(charset);
+
+    std::mt19937_64 rng(42);
+    std::uniform_int_distribution<std::size_t> dist(0, charset_size - 1);
+
+    for (std::size_t i = 0; i < length - 1; ++i)
+    {
+        const auto index = dist(rng);
+        str[i] = charset[index];
+    }
+
+    str[length - 1] = u'\0';
+}
+
+inline void generate_random_u32string(char16_t* str, std::size_t length)
+{
+    const char32_t charset[] = U"0123456789"
+                               U"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                               U"abcdefghijklmnopqrstuvwxyz";
+
+    const std::size_t charset_size = std::char_traits<char32_t>::length(charset);
+
+    std::mt19937_64 rng(42);
+    std::uniform_int_distribution<std::size_t> dist(0, charset_size - 1);
+
+    for (std::size_t i = 0; i < length - 1; ++i)
+    {
+        const auto index = dist(rng);
+        str[i] = charset[index];
+    }
+
+    str[length - 1] = u'\0';
+}
+
+inline void generate_random_wstring(wchar_t* str, std::size_t length)
+{
+    const wchar_t charset[] = L"0123456789"
+                              L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                              L"abcdefghijklmnopqrstuvwxyz";
+
+    const std::size_t charset_size = std::char_traits<wchar_t>::length(charset);
+
+    std::mt19937_64 rng(42);
+    std::uniform_int_distribution<std::size_t> dist(0, charset_size - 1);
+
+    for (std::size_t i = 0; i < length - 1; ++i)
+    {
+        const auto index = dist(rng);
+        str[i] = charset[index];
+    }
+
+    str[length - 1] = u'\0';
 }
 
 } // Namespace crypt
