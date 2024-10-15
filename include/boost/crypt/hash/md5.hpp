@@ -1,6 +1,8 @@
 // Copyright 2024 Matt Borland
 // Distributed under the Boost Software License, Version 1.0.
 // https://www.boost.org/LICENSE_1_0.txt
+//
+// See: https://www.ietf.org/rfc/rfc1321.txt
 
 #ifndef BOOST_CRYPT_HASH_MD5_HPP
 #define BOOST_CRYPT_HASH_MD5_HPP
