@@ -7,13 +7,13 @@
 
 #include <boost/crypt/utility/config.hpp>
 #include <boost/crypt/utility/cstdint.hpp>
-#include <boost/crypt/utility/array.hpp>
 
 #ifndef BOOST_CRYPT_BUILD_MODULE
 #include <fstream>
 #include <string>
 #include <ios>
 #include <exception>
+#include <array>
 #endif
 
 namespace boost {
