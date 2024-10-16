@@ -62,7 +62,7 @@ public:
 
     auto get_bytes_read() const -> std::size_t
     {
-        return fd.gcount();
+        return static_cast<std::size_t>(fd.gcount());
     }
 
     auto eof() const -> bool
