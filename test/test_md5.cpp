@@ -29,6 +29,7 @@
 #include <string>
 #include <array>
 #include <tuple>
+#include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
@@ -333,13 +334,41 @@ void test_invalid_file(T filename)
 
 void files_test()
 {
+    // Based off where we are testing from (test vs boost_root) we need to adjust our filepath
+    const char* filename;
+    const char* filename_2;
+
+    std::ifstream fd("libs/crypt/test/test_file_1.txt", std::ios::binary | std::ios::in);
+    filename = "libs/crypt/test/test_file_1.txt";
+    filename_2 = "libs/crypt/test/test_file_2.txt";
+
+    if (!fd.is_open())
+    {
+            std::ifstream fd2("test_file_1.txt", std::ios::binary | std::ios::in);
+            filename = "test_file_1.txt";
+            filename_2 = "test_file_2.txt";
+
+            if (!fd2.is_open())
+            {
+                std::cerr << "Test not run due to file system issues" << std::endl;
+                return;
+            }
+            else
+            {
+                fd2.close();
+            }
+    }
+    else
+    {
+        fd.close();
+    }
+
     // On macOS 15
     // md5 test_file_1.txt
     // MD5 (test_file_1.txt) = 0d7006cd055e94cf614587e1d2ae0c8e
     constexpr std::array<std::uint16_t, 16> res{0x0d, 0x70, 0x06, 0xcd, 0x05, 0x5e, 0x94, 0xcf,
                                                 0x61, 0x45, 0x87, 0xe1, 0xd2, 0xae, 0x0c, 0x8e};
 
-    const auto filename = "test_file_1.txt";
     test_file(filename, res);
 
     const std::string str_filename {filename};
@@ -367,7 +396,7 @@ void files_test()
     constexpr std::array<std::uint16_t, 16> res_2{0x53, 0x0e, 0x67, 0xfa, 0x4b, 0x01, 0xe3, 0xcc,
                                                   0xae, 0xe8, 0xec, 0xa9, 0x91, 0x6a, 0x81, 0x4c};
 
-    test_file("test_file_2.txt", res_2);
+    test_file(filename_2, res_2);
 }
 
 int main()
