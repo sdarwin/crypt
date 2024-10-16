@@ -1,0 +1,15 @@
+////
+Copyright 2024 Matt Borland
+Distributed under the Boost Software License, Version 1.0.
+https://www.boost.org/LICENSE_1_0.txt
+////
+
+[#reference]
+= References
+:idprefix: ref_
+
+The following books, papers and blog posts serve as the basis for the algorithms used in the library:
+
+:linkattrs:
+
+- Ronald L. Rivest, https://www.ietf.org/rfc/rfc1321.txt[RFC 1321:  The MD5 Message-Digest Algorithm], 1992

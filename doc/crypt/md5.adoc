@@ -1,0 +1,115 @@
+////
+Copyright 2024 Matt Borland
+Distributed under the Boost Software License, Version 1.0.
+https://www.boost.org/LICENSE_1_0.txt
+////
+
+[#md5]
+:idprefix: md5_
+
+= MD5
+
+This library supports MD5 as described in https://www.ietf.org/rfc/rfc1321.txt[RFC 1321].
+There is a wide range of acceptable inputs for the base md5 function:
+
+== Hashing Functions
+
+[source, c++]
+----
+namespace boost {
+namespace crypt {
+
+uisng return_type = boost::crypt::array<uint8_t, 16>;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char* str, size_t len) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const unsigned char* str) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const unsigned char* str, size_t len) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char16_t* str) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char16_t* str, size_t len) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char32_t* str) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const char32_t* str, size_t len) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const wchar_t* str) noexcept -> return_type;
+
+BOOST_CRYPT_GPU_ENABLED constexpr auto md5(const wchar_t* str, size_t len) noexcept -> return_type;
+
+inline auto md5(const std::string& str) noexcept -> return_type;
+
+inline auto md5(const std::u16string& str) noexcept -> return_type;
+
+inline auto md5(const std::u32string& str) noexcept -> return_type;
+
+inline auto md5(const std::wstring& str) noexcept -> return_type;
+
+#ifdef BOOST_CRYPT_HAS_STRING_VIEW
+
+inline auto md5(std::string_view str) noexcept -> return_type;
+
+inline auto md5(std::u16string_view str) noexcept -> return_type;
+
+inline auto md5(std::u32string_view str) noexcept -> return_type;
+
+inline auto md5(std::wstring_view str) noexcept -> return_type;
+
+#endif // BOOST_CRYPT_HAS_STRING_VIEW
+
+} //namespace crypt
+} //namespace boost
+----
+
+== File Hashing Functions
+
+We also have the ability to scan files and return the MD5 value:
+
+[source, c++]
+----
+namespace boost {
+namespace crypt {
+
+uisng return_type = boost::crypt::array<uint8_t, 16>;
+
+inline auto md5_file(const char* filepath) noexcept -> return_type;
+
+inline auto md5_file(const std::string& filepath) noexcept -> return_type;
+
+inline auto md5_file(std::string_view filepath) noexcept -> return_type;
+
+} // namespace crypt
+} // namespace boost
+----
+
+== Hashing Object
+
+[#md5_hasher]
+Lastly, there is also the ability to create a MD5 hashing object and feed it bytes as the user parses them.
+This class does not use any dynamic memory allocation.
+
+[source, c++]
+----
+namespace boost {
+namespace crypt {
+
+class md5_hasher
+{
+    init();
+
+    template <typename ByteType>
+    BOOST_CRYPT_GPU_ENABLED constexpr auto process_byte(ByteType byte) noexcept -> void;
+
+    template <typename ForwardIter>
+    BOOST_CRYPT_GPU_ENABLED constexpr auto process_bytes(ForwardIter buffer, size_t byte_count) noexcept -> void;
+
+    constexpr auto get_digest() noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>;
+};
+
+} // namespace crypt
+} // namespace boost
+----
