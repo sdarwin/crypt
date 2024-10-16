@@ -343,6 +343,7 @@ void files_test()
     filename = "libs/crypt/test/test_file_1.txt";
     filename_2 = "libs/crypt/test/test_file_2.txt";
 
+    // LCOV_EXCL_START
     if (!fd.is_open())
     {
         // Local test directory or IDE
@@ -376,6 +377,7 @@ void files_test()
     {
         fd.close();
     }
+    // LCOV_EXCL_STOP
 
     // On macOS 15
     // md5 test_file_1.txt
