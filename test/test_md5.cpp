@@ -224,7 +224,9 @@ void test_random_values()
         const std::size_t current_str_len {str_len(rng)};
         boost::crypt::generate_random_string(str, current_str_len);
         const auto uuid_res {get_boost_uuid_result(str, current_str_len)};
-        const auto crypt_res {boost::crypt::md5(str, current_str_len)};
+
+        // boost::crypt::array is implicitly convertible to std::array
+        const std::array<std::uint8_t, 16> crypt_res = boost::crypt::md5(str, current_str_len);
 
         for (std::size_t j {}; j < crypt_res.size(); ++j)
         {

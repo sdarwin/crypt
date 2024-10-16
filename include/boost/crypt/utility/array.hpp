@@ -10,6 +10,10 @@
 #include <boost/crypt/utility/cstdint.hpp>
 #include <boost/crypt/utility/cstddef.hpp>
 
+#ifndef BOOST_CRYPT_BUILD_MODULE
+#include <array>
+#endif
+
 namespace boost {
 namespace crypt {
 
@@ -96,6 +100,17 @@ public:
         const auto temp {a};
         a = *this;
         *this = temp;
+    }
+
+    constexpr operator std::array<T, N>() noexcept
+    {
+        std::array<T, N> new_array{};
+        for (boost::crypt::size_t i {}; i < N; ++i)
+        {
+            new_array[i] = elements[i];
+        }
+
+        return new_array;
     }
 };
 
