@@ -338,25 +338,39 @@ void files_test()
     const char* filename;
     const char* filename_2;
 
+    // Boost-root
     std::ifstream fd("libs/crypt/test/test_file_1.txt", std::ios::binary | std::ios::in);
     filename = "libs/crypt/test/test_file_1.txt";
     filename_2 = "libs/crypt/test/test_file_2.txt";
 
     if (!fd.is_open())
     {
-            std::ifstream fd2("test_file_1.txt", std::ios::binary | std::ios::in);
-            filename = "test_file_1.txt";
-            filename_2 = "test_file_2.txt";
+        // Local test directory or IDE
+        std::ifstream fd2("test_file_1.txt", std::ios::binary | std::ios::in);
+        filename = "test_file_1.txt";
+        filename_2 = "test_file_2.txt";
 
-            if (!fd2.is_open())
+        if (!fd2.is_open())
+        {
+            // test/cover
+            std::ifstream fd3("../test_file_1.txt", std::ios::binary | std::ios::in);
+            filename = "../test_file_1.txt";
+            filename_2 = "../test_file_2.txt";
+
+            if (!fd3.is_open())
             {
                 std::cerr << "Test not run due to file system issues" << std::endl;
                 return;
             }
             else
             {
-                fd2.close();
+                fd3.close();
             }
+        }
+        else
+        {
+            fd2.close();
+        }
     }
     else
     {
