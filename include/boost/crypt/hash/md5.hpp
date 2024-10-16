@@ -16,6 +16,7 @@
 #include <boost/crypt/utility/strlen.hpp>
 #include <boost/crypt/utility/cstddef.hpp>
 #include <boost/crypt/utility/iterator.hpp>
+#include <boost/crypt/utility/file.hpp>
 
 #ifndef BOOST_CRYPT_BUILD_MODULE
 #include <memory>
@@ -568,6 +569,69 @@ inline auto md5(std::u32string_view str) -> boost::crypt::array<boost::crypt::ui
 inline auto md5(std::wstring_view str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
+}
+
+#endif // BOOST_CRYPT_HAS_STRING_VIEW
+
+// ---- CUDA also does not have the ability to consume files -----
+
+namespace detail {
+
+template <boost::crypt::size_t block_size = 64U>
+auto md5_file_impl(utility::file_reader<block_size>& reader) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    md5_hasher hasher;
+    while (!reader.eof())
+    {
+        const auto buffer_iter {reader.read_next_block()};
+        const auto len {reader.get_bytes_read()};
+        hasher.process_bytes(buffer_iter, len);
+    }
+
+    return hasher.get_digest();
+}
+
+} // namespace detail
+
+inline auto md5_file(const std::string& filepath) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    try
+    {
+        utility::file_reader<64U> reader(filepath);
+        return detail::md5_file_impl(reader);
+    }
+    catch (const std::runtime_error&)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+    }
+}
+
+inline auto md5_file(const char* filepath) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    try
+    {
+        utility::file_reader<64U> reader(filepath);
+        return detail::md5_file_impl(reader);
+    }
+    catch (const std::runtime_error&)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+    }
+}
+
+#ifdef BOOST_CRYPT_HAS_STRING_VIEW
+
+inline auto md5_file(std::string_view filepath) noexcept -> boost::crypt::array<boost::crypt::uint8_t, 16>
+{
+    try
+    {
+        utility::file_reader<64U> reader(filepath);
+        return detail::md5_file_impl(reader);
+    }
+    catch (const std::runtime_error&)
+    {
+        return boost::crypt::array<boost::crypt::uint8_t, 16>{};
+    }
 }
 
 #endif // BOOST_CRYPT_HAS_STRING_VIEW

@@ -54,10 +54,10 @@ public:
     }
     #endif
 
-    auto read_next_block() -> std::array<std::uint8_t, block_size>&
+    auto read_next_block()
     {
         fd.read(reinterpret_cast<char*>(buffer_.data()), block_size);
-        return buffer_;
+        return buffer_.begin();
     }
 
     auto get_bytes_read() const -> std::size_t
