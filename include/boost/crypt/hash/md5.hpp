@@ -550,22 +550,22 @@ inline auto md5(const std::wstring& str) noexcept -> boost::crypt::array<boost::
 
 #ifdef BOOST_CRYPT_HAS_STRING_VIEW
 
-inline auto md5(const std::string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+inline auto md5(std::string_view str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
 }
 
-inline auto md5(const std::u16string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+inline auto md5(std::u16string_view str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
 }
 
-inline auto md5(const std::u32string_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+inline auto md5(std::u32string_view str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
 }
 
-inline auto md5(const std::wstring_view& str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
+inline auto md5(std::wstring_view str) -> boost::crypt::array<boost::crypt::uint8_t, 16>
 {
     return detail::md5(str.begin(), str.end());
 }
