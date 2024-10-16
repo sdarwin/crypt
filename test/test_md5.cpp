@@ -295,6 +295,81 @@ void test_random_piecewise_values()
     delete[] str_2;
 }
 
+template <typename T>
+void test_file(T filename, const std::array<std::uint16_t, 16>& res)
+{
+    const auto crypt_res {boost::crypt::md5_file(filename)};
+
+    for (std::size_t j {}; j < crypt_res.size(); ++j)
+    {
+        if (!BOOST_TEST_EQ(res[j], crypt_res[j]))
+        {
+            // LCOV_EXCL_START
+            std::cerr << "Failure with file: " << filename << std::endl;
+            break;
+            // LCOV_EXCL_STOP
+        }
+    }
+}
+
+template <typename T>
+void test_invalid_file(T filename)
+{
+    constexpr std::array<std::uint16_t, 16> res{};
+
+    const auto crypt_res {boost::crypt::md5_file(filename)};
+
+    for (std::size_t j {}; j < crypt_res.size(); ++j)
+    {
+        if (!BOOST_TEST_EQ(res[j], crypt_res[j]))
+        {
+            // LCOV_EXCL_START
+            std::cerr << "Failure with file: " << filename << std::endl;
+            break;
+            // LCOV_EXCL_STOP
+        }
+    }
+}
+
+void files_test()
+{
+    // On macOS 15
+    // md5 test_file_1.txt
+    // MD5 (test_file_1.txt) = 0d7006cd055e94cf614587e1d2ae0c8e
+    constexpr std::array<std::uint16_t, 16> res{0x0d, 0x70, 0x06, 0xcd, 0x05, 0x5e, 0x94, 0xcf,
+                                                0x61, 0x45, 0x87, 0xe1, 0xd2, 0xae, 0x0c, 0x8e};
+
+    const auto filename = "test_file_1.txt";
+    test_file(filename, res);
+
+    const std::string str_filename {filename};
+    test_file(str_filename, res);
+
+    #ifdef BOOST_CRYPT_HAS_STRING_VIEW
+    const std::string_view str_view_filename {str_filename};
+    test_file(str_view_filename, res);
+    #endif
+
+    const auto invalid_filename = "broken.bin";
+    test_invalid_file(invalid_filename);
+
+    const std::string str_invalid_filename {invalid_filename};
+    test_invalid_file(str_invalid_filename);
+
+    #ifdef BOOST_CRYPT_HAS_STRING_VIEW
+    const std::string_view str_view_invalid_filename {str_invalid_filename};
+    test_invalid_file(str_view_invalid_filename);
+    #endif
+
+    // On macOS 15
+    // md5 test_file_2.txt
+    // MD5 (test_file_2.txt) = 530e67fa4b01e3ccaee8eca9916a814c
+    constexpr std::array<std::uint16_t, 16> res_2{0x53, 0x0e, 0x67, 0xfa, 0x4b, 0x01, 0xe3, 0xcc,
+                                                  0xae, 0xe8, 0xec, 0xa9, 0x91, 0x6a, 0x81, 0x4c};
+
+    test_file("test_file_2.txt", res_2);
+}
+
 int main()
 {
     basic_tests();
@@ -317,6 +392,8 @@ int main()
 
     test_random_values<wchar_t>();
     test_random_piecewise_values<wchar_t>();
+
+    files_test();
 
     return boost::report_errors();
 }
